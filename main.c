@@ -15,10 +15,15 @@ typedef struct
 void init(team a, team b)
 {
 	int i;
+	char num[11][3];
+	for (i=0;i<11;i++)
+		sprintf(num[i],"%d",i+1);
 	for (i=0;i<11;i++)
 	{
 		strcpy(a.player[i],"Player ");
 		strcpy(b.player[i],"Player ");
+		strcat(a.player[i],num[i]);
+		strcat(b.player[i],num[i]);
 	}
 	a.runs=0;
 	b.runs=0;
@@ -51,9 +56,11 @@ void inputnames(team a, team b)
 	}
 }
 
-void printscoreboard(int a, int b)
+void printscoreboard(team a, team b)
 {
-	
+	printf("+----------------------+----------+---------------------+\n");
+	printf("| %s \t\tvs\t\t %s |\n",a.name,b.name);
+	printf("+----------------------+----------+---------------------+\n");
 }
 
 int main()
@@ -61,6 +68,6 @@ int main()
 	team a,b;
 	init(a,b);
 	inputnames(a,b);
-	printscoreboard(a,b);
+//	printscoreboard(a,b);
 	return 0;
 }
