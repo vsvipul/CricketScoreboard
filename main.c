@@ -9,17 +9,22 @@ int flag=0;
 
 void clrscr()
 {
-	system("@cls||clear");
+	system("clear");
 }
 
-void printScore(char a[], char b[], int scoreteam1, int scoreteam2, int wickets1, int wickets2)
+void printScore(char a[], char b[], int scoreteam1, int scoreteam2, int wickets1, int wickets2, int curball)
 {
     printf("\t\t\t##########################################################\n");
-    printf("\t\t\t##########################################################\n\n");
-    printf("\t\t\t%s %d/%d\n",a,scoreteam1,10-wickets1);
+    printf("\t\t\t###########    Overs- %d.%d       ########################\n\n", curball/6, curball%6);
+    printf("\t\t\t%s %d/%d",a,scoreteam1,10-wickets1);
+    if (!flag)
+    	printf("\t\tCur RR:%.1f", (float)(scoreteam1*6)/(float)curball);
+    printf("\n");
     printf("\t\t\t%s %d/%d",b,scoreteam2,10-wickets2);
     if (!flag)
     	printf("\tYet to bat\n");
+    else
+    	printf("\t\tCur RR:%.1f\tReq RR:%.1f", (float)(scoreteam2*6)/(float)curball, (float)((scoreteam1-scoreteam2+1)*6)/(float)(6*overs-curball));
     printf("\n");
     printf("\t\t\t##########################################################\n");
     printf("\t\t\t##########################################################\n\n");
@@ -31,6 +36,8 @@ void printResult(char a[], char b[])
     printf("Match over\a\n");
     if (team1score>team2score)
         printf("\t\t\t\t\t%s wins\n\n\n\n\n",a);
+    else if (team1score==team2score)
+    	printf("\t\t\t\t%s tied with %s\n\n\n\n",a,b);
     else
         printf("\t\t\t\t\t%s wins\n\n\n\n\n",b);;
 }
@@ -42,28 +49,35 @@ int main()
 	scanf(" %c",&x);
 	if (x=='y' || x=='Y')
 	{
-		char name1[50],name2[50],tmp[50],act[10];
+		char name1[50], name2[50], tmp[50], act[10];
+		int f=0;
 		printf("Enter name of first team.\n");
-		scanf(" %s", name1);
+		scanf(" %[^\n]", name1);
 		printf("Enter name of second team.\n");
-		scanf("%s", name2);
+		scanf(" %[^\n]", name2);
 		printf("Enter number of overs in each innings.\n");
 		scanf(" %d", &overs);
-		int balls=6*overs;
 		printf("Which team is batting first, %s or %s ?\n",name1,name2);
-		scanf(" %s", tmp);
-		if (strcmp(tmp,name1)==0)
+		scanf(" %[^\n]", tmp);
+		if (strcmp(tmp, name1)==0)
 		{
+			int balls=6*overs;
 			int wickets1=10;
 			int wickets2=10;
 			char tmp2[50];
+			int curball=0;
 			while (wickets1 && balls)
 			{
-				printScore(name1, name2, team1score, team2score, wickets1, wickets2);
+				printScore(name1, name2, team1score, team2score, wickets1, wickets2, curball);
+				if (f)
+				{
+					printf("Invalid input. Please enter again.\n");
+					f=0;
+				}
 				printf("What happened on this delivery?\n");
-				printf("Wd for WideBall\nW for wicket\nNb for NO ball\nOr runs scored( <=0 )");
-				printf("\nWdW for WideBall+Wicket\nNbW for NO ball+Wicket\nWd(Runs) for Wideball+Runs\nNb(Runs) for NOball+Runs\n");
-				scanf(" %s", act);
+				printf("1. Wd for WideBall\n2. W for wicket\n3. Nb for NoBall\n4. WdW for WideBall+Wicket\n");
+				printf("5. NbW for NoBall+Wicket\n6. Wd(Runs) for Wideball+Runs\n7. Nb(Runs) for Noball+Runs\n8. Number of runs scored in current ball\n");
+				scanf(" %s",act);
 				if (strcmp(act,"Wd")==0)
                 {
                     team1score++;
@@ -76,6 +90,7 @@ int main()
                 {
                     wickets1--;
                     balls--;
+                    curball++;
                 }
                 else if (strcmp(act,"WdW")==0)
                 {
@@ -97,23 +112,33 @@ int main()
                     team1score++;
                     team1score+=((int)act[2]-'0');
                 }
-                else
+                else if (act[0]>='0' && act[0]<='6')
                 {
                     team1score+=((int)act[0]-'0');
                     balls--;
+                    curball++;
+                }
+                else
+                {
+                	f=1;
                 }
             }
             printf("First Innings over\a\n");
             flag=1;
             balls=6*overs;
-
+            curball=0;
             while (balls && wickets2)
             {
-                printScore(name1, name2, team1score, team2score, wickets1, wickets2);
+                printScore(name1, name2, team1score, team2score, wickets1, wickets2, curball);
+                if (f)
+				{
+					printf("Invalid input. Please enter again.\n");
+					f=0;
+				}
                 printf("What happened on this delivery?\n");
-                printf("Wd for WideBall\nW for wicket\nNb for NO ball\nOr runs scored( <=0 )\n");
-                printf("WdW for WideBall+Wicket\nNbW for NO ball+Wicket\nWd(Runs) for Wideball+Runs\nNb(Runs) for NOball+Runs\n");
-                scanf(" %s",act);
+				printf("1. Wd for WideBall\n2. W for wicket\n3. Nb for NoBall\n4. WdW for WideBall+Wicket\n");
+				printf("5. NbW for NoBall+Wicket\n6. Wd(Runs) for Wideball+Runs\n7. Nb(Runs) for Noball+Runs\n8. Number of runs scored in current ball\n");
+				scanf(" %s",act);
                 if (strcmp(act,"Wd")==0)
                 {
                     team2score++;
@@ -126,6 +151,7 @@ int main()
                 {
                     wickets2--;
                     balls--;
+                    curball++;
                 }
                 else if (strcmp(act,"WdW")==0)
                 {
@@ -147,10 +173,15 @@ int main()
                     team2score++;
                     team2score+=((int)act[2]-'0');
                 }
-                else
+                else if (act[0]>='0' && act[0]<='6')
                 {
                     team2score+=((int)act[0]-'0');
                     balls--;
+                    curball++;
+                }
+                else
+                {
+                	f=1;
                 }
                 if(team2score>team1score)
                 {
@@ -158,20 +189,27 @@ int main()
                     break;
                 }
             }
-
+            printResult(name1,name2);
         }
         else
         {
             int wickets2=10;
 			int wickets1=10;
 			char tmp2[50];
+			int curball=0;
+			int balls=6*overs;
 			while (wickets2 && balls)
 			{
-				printScore(name2, name1, team2score, team1score, wickets2, wickets1);
+				printScore(name2, name1, team2score, team1score, wickets2, wickets1, curball);
+				if (f)
+				{
+					printf("Invalid input. Please enter again.\n");
+					f=0;
+				}
 				printf("What happened on this delivery?\n");
-				printf("Wd for WideBall\nW for wicket\nNb for NO ball\nOr runs scored( <=0 )\n");
-				printf("\nWdW for WideBall+Wicket\nNbW for NO ball+Wicket\nWd(Runs) for Wideball+Runs\nNb(Runs) for NOball+Runs\n");
-				fgets(act,10,stdin);
+				printf("1. Wd for WideBall\n2. W for wicket\n3. Nb for NoBall\n4. WdW for WideBall+Wicket\n");
+				printf("5. NbW for NoBall+Wicket\n6. Wd(Runs) for Wideball+Runs\n7. Nb(Runs) for Noball+Runs\n8. Number of runs scored in current ball\n");
+				scanf(" %s", act);
 				if (strcmp(act,"Wd")==0)
                 {
                     team2score++;
@@ -184,11 +222,12 @@ int main()
                 {
                     wickets2--;
                     balls--;
+                    curball++;
                 }
                 else if (strcmp(act,"WdW")==0)
                 {
                     wickets2--;
-                    team1score++;
+                    team2score++;
                 }
                 else if (strcmp(act,"NbW")==0)
                 {
@@ -205,23 +244,33 @@ int main()
                     team2score++;
                     team2score+=((int)act[2]-'0');
                 }
-                else
+                else if (act[0]>='0' && act[0]<='6')
                 {
                     team2score+=((int)act[0]-'0');
                     balls--;
+                    curball++;
+                }
+                else
+                {
+                	f=1;
                 }
             }
             printf("First Innings over\a\n");
             flag=1;
             balls=6*overs;
-
+            curball=0;
             while (balls && wickets1)
             {
-                printScore(name2, name1, team2score, team1score, wickets2, wickets1);
+                printScore(name2, name1, team2score, team1score, wickets2, wickets1, curball);
+                if (f)
+				{
+					printf("Invalid input. Please enter again.\n");
+					f=0;
+				}
                 printf("What happened on this delivery?\n");
-                printf("Wd for WideBall\nW for wicket\nNb for NO ball\nOr runs scored( <=0 )\n");
-                printf("WdW for WideBall+Wicket\nNbW for NO ball+Wicket\nWd(Runs) for Wideball+Runs\nNb(Runs) for NOball+Runs\n");
-                fgets(act,10,stdin);
+				printf("1. Wd for WideBall\n2. W for wicket\n3. Nb for NoBall\n4. WdW for WideBall+Wicket\n");
+				printf("5. NbW for NoBall+Wicket\n6. Wd(Runs) for Wideball+Runs\n7. Nb(Runs) for Noball+Runs\n8. Number of runs scored in current ball\n");
+				scanf(" %s",act);
                 if (strcmp(act,"Wd")==0)
                 {
                     team1score++;
@@ -234,6 +283,7 @@ int main()
                 {
                     wickets1--;
                     balls--;
+                    curball++;
                 }
                 else if (strcmp(act,"WdW")==0)
                 {
@@ -255,12 +305,17 @@ int main()
                     team1score++;
                     team1score+=((int)act[2]-'0');
                 }
-                else
+                else if (act[0]>='0' && act[0]<='6')
                 {
                     team1score+=((int)act[0]-'0');
                     balls--;
+                    curball++;
                 }
-                if(team2score>team1score)
+                else
+                {
+                	f=1;
+                }
+                if (team1score>team2score)
                 {
                     printResult(name1,name2);
                     break;
@@ -268,6 +323,37 @@ int main()
             }
         }
         printResult(name1,name2);
+
+        FILE* fi = fopen("data.txt","w");
+    	fprintf(fi,"%s\t%d\n",name1,team1score);
+    	fprintf(fi,"%s\t%d\n",name2,team2score);
+    	if (team1score>team2score)
+    		fprintf(fi,"%s wins\n",name1);
+    	else if (team2score>team1score)
+    		fprintf(fi,"%s wins\n",name2);
+    	else
+    		fprintf(fi,"%s tied with %s",name1, name2);
+    	fclose(fi);
+
+    }
+    else
+    {
+    	printf("Would you like to know result of previous match? Enter y for yes and n for no.\n");
+    	char ch;
+    	scanf(" %c",&ch);
+    	if (ch=='y' || ch=='Y')
+    	{
+    		clrscr();
+    		FILE* fi=fopen("data.txt","r");
+    		char t[100];
+    		while (fscanf(fi," %[^\n]",t)!=EOF)
+    		{
+    			printf("%s\n",t);
+    		}
+    		fclose(fi);
+    	}
+    	else
+    		printf("Thanks for using!\n");
     }
 	return 0;
 }
