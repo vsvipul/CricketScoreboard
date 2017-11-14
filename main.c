@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 static int team1score=0;
 static int team2score=0;
@@ -17,13 +18,13 @@ void printScore(char a[], char b[], int scoreteam1, int scoreteam2, int wickets1
     printf("\t\t\t##########################################################\n");
     printf("\t\t\t###########    Overs- %d.%d       ########################\n\n", curball/6, curball%6);
     printf("\t\t\t%s %d/%d",a,scoreteam1,10-wickets1);
-    if (!flag)
+    if (!flag && curball!=0)
     	printf("\t\tCur RR:%.1f", (float)(scoreteam1*6)/(float)curball);
     printf("\n");
     printf("\t\t\t%s %d/%d",b,scoreteam2,10-wickets2);
     if (!flag)
     	printf("\tYet to bat\n");
-    else
+    else if (curball!=0)
     	printf("\t\tCur RR:%.1f\tReq RR:%.1f", (float)(scoreteam2*6)/(float)curball, (float)((scoreteam1-scoreteam2+1)*6)/(float)(6*overs-curball));
     printf("\n");
     printf("\t\t\t##########################################################\n");
@@ -42,6 +43,13 @@ void printResult(char a[], char b[])
         printf("\t\t\t\t\t%s wins\n\n\n\n\n",b);;
 }
 
+int toss()
+{
+	srand(time(0));
+    int x = rand() % 2;
+    return x;
+}
+
 int main()
 {
 	char x;
@@ -57,9 +65,14 @@ int main()
 		scanf(" %[^\n]", name2);
 		printf("Enter number of overs in each innings.\n");
 		scanf(" %d", &overs);
-		printf("Which team is batting first, %s or %s ?\n",name1,name2);
-		scanf(" %[^\n]", tmp);
-		if (strcmp(tmp, name1)==0)
+		int tosschoice=toss();
+		int choice;
+		if (tosschoice==0)
+			printf("%s won the toss. Enter 1 for batting first and 2 for bowling first\n", name1);
+		else
+			printf("%s won the toss. Enter 1 for bowling first and 2 for batting first\n", name2);
+		scanf(" %d",&choice);
+		if (choice==1)		//team 1 batting team 2 bowling
 		{
 			int balls=6*overs;
 			int wickets1=10;
@@ -191,7 +204,7 @@ int main()
             }
             printResult(name1,name2);
         }
-        else
+        else if (choice==2)						//team 2 batting team 1 bowling
         {
             int wickets2=10;
 			int wickets1=10;
@@ -321,6 +334,11 @@ int main()
                     break;
                 }
             }
+        }
+        else
+        {
+        	printf("Invalid choice. Please try again\n");
+        	exit(0);
         }
         printResult(name1,name2);
 
