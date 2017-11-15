@@ -3,12 +3,12 @@
 #include <string.h>
 #include <time.h>
 
-void clrscr()
+void clrscr()			//clears the terminal screen
 {
 	system("clear");
 }
 
-void prompt()
+void prompt()			
 {
 	printf("What happened on this delivery?\n");
 	printf("1. Wd for WideBall\n2. W for wicket\n3. Nb for NoBall\n4. WdW for WideBall+Wicket\n");
@@ -40,9 +40,9 @@ void printScore(char a[], char b[], int scoreteam1, int scoreteam2, int wickets1
 	prompt();
 }
 
-void printResult(char a[], char b[], int team1score, int team2score)
+void printResult(char a[], char b[], int team1score, int team2score)		//prints match result when match is over
 {
-	printf("Match over\a\n");
+	printf("Match over\n");
 	if (team1score > team2score)
 		printf("\t\t\t\t\t%s wins\n\n\n\n\n", a);
 	else if ( team1score == team2score )
@@ -51,7 +51,7 @@ void printResult(char a[], char b[], int team1score, int team2score)
 		printf("\t\t\t\t\t%s wins\n\n\n\n\n", b);
 }
 
-void toss(char name1[], char name2[])
+void toss(char name1[], char name2[])					//toss between the two teams
 {
 	srand(time(0));
 	int x = rand() % 2;
@@ -61,7 +61,7 @@ void toss(char name1[], char name2[])
 		printf("%s won the toss. Enter 1 for bowling first and 2 for batting first\n", name2);
 }
 
-void inputnames(char name1[], char name2[])
+void inputnames(char name1[], char name2[])			//inputs team names
 {
 	printf("Enter name of first team.\n");
 	scanf(" %[^\n]", name1);
@@ -69,17 +69,22 @@ void inputnames(char name1[], char name2[])
 	scanf(" %[^\n]", name2);
 }
 
-void printpreviousrecord()
+void printpreviousrecord()							//prints result of last match
 {
 	clrscr();
 	FILE* fi=fopen("data.txt", "r");
 	char t[100];
-	while ( fscanf(fi," %[^\n]",t) != EOF )
-		printf("%s\n", t);
-	fclose(fi);
+	if (fi!=NULL)
+	{
+		while ( fscanf(fi," %[^\n]",t) != EOF )
+			printf("%s\n", t);
+		fclose(fi);
+	}
+	else
+		printf("You need to create a match first.\n");
 }
 
-void savecurrentrecord(char name1[], char name2[], int scoreteam1, int scoreteam2)
+void savecurrentrecord(char name1[], char name2[], int scoreteam1, int scoreteam2)		//saves current match result
 {
 	FILE* fi = fopen("data.txt", "w");
 	fprintf(fi, "%s\t%d\n", name1, scoreteam1);
@@ -93,7 +98,7 @@ void savecurrentrecord(char name1[], char name2[], int scoreteam1, int scoreteam
 	fclose(fi);
 }
 
-void execball(char act[], int *curteamscore, int *curwickets, int *balls, int *curball, int *f) 
+void execball(char act[], int *curteamscore, int *curwickets, int *balls, int *curball, int *f) 	//changes the variables acc to current ball input
 {
 	if (strcmp(act, "Wd") == 0)
 	{
@@ -119,12 +124,12 @@ void execball(char act[], int *curteamscore, int *curwickets, int *balls, int *c
 		*curwickets = *curwickets-1;
 		*curteamscore = *curteamscore+1;
 	}
-	else if (act[0]=='W' && act[1]=='d')
+	else if (act[0]=='W' && act[1]=='d' && act[2]>='0' && act[2]<='6' && strlen(act)==3)
 	{
 		*curteamscore = *curteamscore+1;
 		*curteamscore = *curteamscore + ((int)act[2]-'0');
 	}
-	else if (act[0]=='N' && act[1]=='b')
+	else if (act[0]=='N' && act[1]=='b' && act[2]>='0' && act[2]<='6' && strlen(act)==3)
 	{
 		*curteamscore = *curteamscore+1;
 		*curteamscore = *curteamscore + ((int)act[2]-'0');
@@ -161,8 +166,6 @@ int main()
 		double yvals2[overs*6];
 		memset(yvals1,0,sizeof(yvals1));
 		memset(yvals2,0,sizeof(yvals2));
-		yvals1[0]=0;
-		yvals2[0]=0;
 
 		if (choice == 1)									//team 1 batting team 2 bowling
 		{
@@ -178,7 +181,7 @@ int main()
 				if (curball && !yvals1[curball])
 					yvals1[curball]=(double)(team1score*6)/(double)curball;
 			}
-			printf("First Innings over\a\n");
+			printf("First Innings over\n");
 			flag = 1;
 			balls = 6*overs;
 			curball = 0;
@@ -213,7 +216,7 @@ int main()
 				if (curball && !yvals2[curball])
 					yvals2[curball]=(double)(team2score*6)/(double)curball;
 			}
-			printf("First Innings over\a\n");
+			printf("First Innings over\n");
 			flag = 1;
 			balls = 6*overs;
 			curball = 0;
