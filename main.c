@@ -144,18 +144,26 @@ void execball(char act[], int *curteamscore, int *curwickets, int *balls, int *c
 int main()
 {
 	char x;
-	int team1score = 0, team2score = 0, overs, flag = 0; //flag=0 means first innings and flag=1 means second innings
+	int i, team1score = 0, team2score = 0, overs, flag = 0; //flag=0 means first innings and flag=1 means second innings
 	printf("Do you want to start a new match? Enter y for yes and n for no\n");
 	scanf(" %c", &x);
 	if (x=='y' || x=='Y')
 	{
 		char name1[50], name2[50], act[10];
-		int f=0, choice, balls, wickets1, wickets2, curball;										//f=1 means invalid input
+		int f=0, choice, balls, wickets1, wickets2, curball;				//f=1 means invalid input
 		inputnames(name1, name2);
 		printf("Enter number of overs in each innings.\n");
 		scanf(" %d", &overs);
 		toss(name1, name2);
 		scanf(" %d",&choice);
+
+		double yvals1[overs*6];								//For GNUplot
+		double yvals2[overs*6];
+		memset(yvals1,0,sizeof(yvals1));
+		memset(yvals2,0,sizeof(yvals2));
+		yvals1[0]=0;
+		yvals2[0]=0;
+
 		if (choice == 1)									//team 1 batting team 2 bowling
 		{
 			balls = 6*overs;
@@ -167,6 +175,8 @@ int main()
 				printScore(name1, name2, team1score, team2score, wickets1, wickets2, curball, flag, overs, &f);
 				scanf(" %s", act);
 				execball(act, &team1score, &wickets1, &balls, &curball, &f);
+				if (curball && !yvals1[curball])
+					yvals1[curball]=(double)(team1score*6)/(double)curball;
 			}
 			printf("First Innings over\a\n");
 			flag = 1;
@@ -177,6 +187,8 @@ int main()
 				printScore(name1, name2, team1score, team2score, wickets1, wickets2, curball, flag, overs, &f);
 				scanf(" %s", act);
 				execball(act, &team2score, &wickets2, &balls, &curball, &f);
+				if (curball && !yvals2[curball])
+					yvals2[curball]=(double)(team2score*6)/(double)curball;
 				if(team2score > team1score)
 				{
 					printScore(name2, name1, team2score, team1score, wickets2, wickets1, curball, flag, overs, &f);
@@ -198,6 +210,8 @@ int main()
 				printScore(name2, name1, team2score, team1score, wickets2, wickets1, curball, flag, overs, &f);
 				scanf(" %s", act);
 				execball(act, &team2score, &wickets2, &balls, &curball, &f);
+				if (curball && !yvals2[curball])
+					yvals2[curball]=(double)(team2score*6)/(double)curball;
 			}
 			printf("First Innings over\a\n");
 			flag = 1;
@@ -208,6 +222,8 @@ int main()
 				printScore(name2, name1, team2score, team1score, wickets2, wickets1, curball, flag, overs, &f);
 				scanf(" %s",act);
 				execball(act, &team1score, &wickets1, &balls, &curball, &f);
+				if (curball && !yvals1[curball])
+					yvals1[curball]=(double)(team1score*6)/(double)curball;
 				if (team1score > team2score)
 				{
 					printScore(name2, name1, team2score, team1score, wickets2, wickets1, curball, flag, overs, &f);
@@ -224,6 +240,27 @@ int main()
 		printScore(name2, name1, team2score, team1score, wickets2, wickets1, curball, flag, overs, &f);
 		printResult(name1, name2, team1score, team2score);
 		savecurrentrecord(name1, name2, team1score, team2score);
+
+		//GNUplot part begins
+		char* commandsForGnuplot1[] = {"set title \"Run Rate vs balls for team 1\"", "plot 'data1.temp'"};
+		char* commandsForGnuplot2[] = {"set title \"Run Rate vs balls for team 2\"", "plot 'data2.temp'"};
+	    double xvals[overs*6];
+	    for (i=0;i<overs*6;i++)
+	    	xvals[i]=i;
+	    FILE* temp1 = fopen("data1.temp", "w");
+	    FILE* temp2 = fopen("data2.temp", "w");
+	    FILE* gnuplotPipe1 = popen ("gnuplot -persistent", "w");
+	    FILE* gnuplotPipe2 = popen ("gnuplot -persistent", "w");
+	    for (i=0; i < 6*overs; i++)
+	    	fprintf(temp1, "%lf %lf \n", xvals[i], yvals1[i]); //Write the data to a temporary file
+	    for (i=0; i < 6*overs; i++)
+	    	fprintf(temp2, "%lf %lf \n", xvals[i], yvals2[i]); //Write the data to a temporary file
+	    for (i=0; i < 2; i++)
+	    	fprintf(gnuplotPipe1, "%s \n", commandsForGnuplot1[i]); //Send commands to gnuplot one by one.
+	    for (i=0; i < 2; i++)
+	    	fprintf(gnuplotPipe2, "%s \n", commandsForGnuplot2[i]); //Send commands to gnuplot one by one.
+	    //GNUplot part ends
+    	
 	}
 	else
 	{
